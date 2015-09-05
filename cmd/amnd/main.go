@@ -12,7 +12,7 @@ var (
 	logLevels = []string{"fatal", "error", "warn", "info", "debug"}
 	app       = kingpin.New("amnd", "Plex updater daemon").Version(amnd.Version())
 
-	cf = app.Flag("config-file", "Config file path").Short('C').PlaceHolder("/path/to/config").Default("/etc/amnd.yml").OverrideDefaultFromEnvar("AMND_CONFIG").ExistingFile()
+	cf = app.Flag("config-file", "Config file path. Default: /etc/amnd.yml").Short('C').PlaceHolder("/path/to/config").Default("/etc/amnd.yml").OverrideDefaultFromEnvar("AMND_CONFIG").ExistingFile()
 	in = app.Flag("update-interval", "Update interval").Short('t').Default("24h").OverrideDefaultFromEnvar("AMND_INTERVAL").Duration()
 	tm = app.Flag("tmpdir", "Temp dir").Default("/tmp").OverrideDefaultFromEnvar("AMND_TMP").ExistingDir()
 	lv = app.Flag("log-level", "Logging level. One of: debug, info, warn, error, fatal").Short('l').Default("info").OverrideDefaultFromEnvar("AMND_LOG_LEVEL").Enum(logLevels...)

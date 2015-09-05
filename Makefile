@@ -1,7 +1,7 @@
 PROJECT = github.com/albertrdixon/amnd
 REV ?= $$(git rev-parse --short=8 HEAD)
 BRANCH ?= $$(git rev-parse --abbrev-ref HEAD | tr / _)
-EXECUTABLE = "amnd"
+EXECUTABLE = amnd
 BINARY = cmd/amnd/main.go
 LDFLAGS = "-s -X $(PROJECT)/amnd.SHA $(REV)"
 TEST_COMMAND = godep go test
@@ -9,7 +9,7 @@ PLATFORMS = linux darwin
 
 .PHONY: dep-save dep-restore test test-verbose build install
 
-all: dep-restore test build install
+all: dep-restore test build package
 
 help:
 	@echo "Available targets:"
@@ -40,10 +40,10 @@ test-verbose:
 	@ echo ""
 	@$(TEST_COMMAND) -test.v ./...
 
-build:
+build: clean
 	@echo "==> Building $(EXECUTABLE) with ldflags '$(LDFLAGS)'"
 	@ GOOS=linux CGO_ENABLED=0 godep go build -a -installsuffix cgo -ldflags $(LDFLAGS) -o bin/$(EXECUTABLE)-linux $(BINARY)
-	@ GOOS=darwin CGO_ENABLED=0 godep go build -a -ldflags $(LDFLAGS) -o bin/$(EXECUTABLE)-darwin
+	@ GOOS=darwin CGO_ENABLED=0 godep go build -a -ldflags $(LDFLAGS) -o bin/$(EXECUTABLE)-darwin $(BINARY)
 
 package: build
 	@echo "==> Tar'ing up the binaries"
@@ -51,9 +51,11 @@ package: build
 		echo "==> Tar'ing up $$p/amd64 binary" ; \
 		test -f bin/$(EXECUTABLE)-$$p && \
 		cp -f bin/$(EXECUTABLE)-$$p $(EXECUTABLE) && \
-		tar czf $(EXECUTABLE)-$$p.tar.gz $(EXECUTABLE) ; \
+		tar czf $(EXECUTABLE)-$$p.tar.gz $(EXECUTABLE) && \
+		rm -f $(EXECUTABLE) ; \
 	done
 
 clean:
-	go clean ./...
-	rm -f $(EXECUTABLE) *.tar.gz bin/*
+	@echo "==> Cleaning working directory"
+	@go clean ./...
+	rm -vf $(EXECUTABLE) *.tar.gz bin/*
